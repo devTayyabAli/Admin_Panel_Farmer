@@ -13,7 +13,7 @@ const Users = () => {
   const fetchUsers = async () => {
     setLoading(true)
     try {
-      const res = await axios.get('/api/admin/users', {
+      const res = await axios.get('/admin/users', {
         headers: { 'x-auth-token': localStorage.getItem('token') }
       })
       setUsers(res.data)

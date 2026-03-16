@@ -15,7 +15,7 @@ const Login = ({ onLogin }) => {
     setError('')
     
     try {
-      const res = await axios.post('/api/auth/login', { email, password })
+      const res = await axios.post('/admin/auth/login', { email, password })
       if (res.data.user.role !== 'admin') {
         throw new Error('Access denied. Admin only.')
       }

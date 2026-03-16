@@ -35,7 +35,7 @@ const Dashboard = () => {
       if (dateRange.start) params.startDate = dateRange.start
       if (dateRange.end) params.endDate = dateRange.end
 
-      const res = await axios.get('/api/admin/stats', {
+      const res = await axios.get('/admin/stats', {
         headers: { 'x-auth-token': token },
         params
       })

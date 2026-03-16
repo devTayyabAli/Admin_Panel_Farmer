@@ -19,7 +19,7 @@ const Sales = () => {
     setLoading(true)
     try {
       const token = localStorage.getItem('token')
-      const res = await axios.get('/api/admin/sales', {
+      const res = await axios.get('/admin/sales', {
         headers: { 'x-auth-token': token },
         params: {
           ...filters,

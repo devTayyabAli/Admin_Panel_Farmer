@@ -10,7 +10,7 @@ const Vehicles = () => {
   const fetchVehicles = async () => {
     setLoading(true)
     try {
-      const res = await axios.get('/api/admin/vehicles', {
+      const res = await axios.get('/admin/vehicles', {
         headers: { 'x-auth-token': localStorage.getItem('token') }
       })
       setVehicles(res.data)
