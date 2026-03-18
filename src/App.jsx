@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom'
 import Sidebar from './components/layout/Sidebar'
 import Header from './components/layout/Header'
@@ -10,13 +10,43 @@ import Login from './pages/Login'
 
 const App = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true)
+  const [isMobile, setIsMobile] = useState(false)
   const [user, setUser] = useState(JSON.parse(localStorage.getItem('user')))
 
-  React.useEffect(() => {
+  useEffect(() => {
+    const checkMobile = () => {
+      const mobile = window.innerWidth <= 768
+      setIsMobile(mobile)
+      if (mobile) {
+        setIsSidebarOpen(false)
+      } else {
+        setIsSidebarOpen(true)
+      }
+    }
+    
+    checkMobile()
+    window.addEventListener('resize', checkMobile)
+    
     const handleToggle = () => setIsSidebarOpen(prev => !prev)
     window.addEventListener('toggle-sidebar', handleToggle)
-    return () => window.removeEventListener('toggle-sidebar', handleToggle)
+    
+    return () => {
+      window.removeEventListener('resize', checkMobile)
+      window.removeEventListener('toggle-sidebar', handleToggle)
+    }
   }, [])
+
+  const handleLogout = () => {
+    localStorage.removeItem('token')
+    localStorage.removeItem('user')
+    setUser(null)
+  }
+
+  const closeSidebar = () => {
+    if (isMobile) {
+      setIsSidebarOpen(false)
+    }
+  }
 
   if (!user) {
     return <Login onLogin={setUser} />
@@ -27,18 +57,22 @@ const App = () => {
       <div className="app-container">
         {/* Mobile ONLY overlay */}
         <div 
-          className={`drawer-overlay mobile-only ${isSidebarOpen ? 'active' : ''}`} 
-          onClick={() => setIsSidebarOpen(false)}
+          className={`drawer-overlay mobile-only ${isSidebarOpen && isMobile ? 'active' : ''}`}
+          onClick={closeSidebar}
         ></div>
 
-        <Sidebar isOpen={isSidebarOpen} onLogout={() => {
-          localStorage.removeItem('token')
-          localStorage.removeItem('user')
-          setUser(null)
-        }} />
+        <Sidebar 
+          isOpen={isSidebarOpen} 
+          onLogout={handleLogout}
+          onClose={closeSidebar}
+        />
         
-        <main className={`main-content ${isSidebarOpen ? 'sidebar-open' : 'sidebar-collapsed'}`}>
-          <Header toggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} user={user} />
+        <main className={`main-content ${isSidebarOpen && !isMobile ? 'sidebar-open' : ''}`}>
+          <Header 
+            toggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} 
+            user={user}
+            onLogout={handleLogout}
+          />
           
           <div className="content-inner">
             <Routes>

@@ -1,16 +1,16 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { 
   LayoutDashboard, 
   Users, 
   ShoppingBag, 
   Truck, 
-  Settings,
   LogOut,
-  ChevronLeft
+  ChevronLeft,
+  X
 } from 'lucide-react'
 
-const Sidebar = ({ isOpen, onLogout }) => {
+const Sidebar = ({ isOpen, onLogout, onClose }) => {
   const location = useLocation()
   
   const navItems = [
@@ -20,6 +20,17 @@ const Sidebar = ({ isOpen, onLogout }) => {
     { title: 'Vehicles', icon: <Truck size={20} />, path: '/vehicles' },
   ]
 
+  // Close sidebar when clicking outside on mobile
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth <= 768 && isOpen && onClose) {
+        // Let the parent handle closing
+      }
+    }
+    window.addEventListener('resize', handleResize)
+    return () => window.removeEventListener('resize', handleResize)
+  }, [isOpen, onClose])
+
   return (
     <aside className={`sidebar ${isOpen ? 'open' : 'collapsed'}`}>
       <div className="sidebar-header">
@@ -27,12 +38,21 @@ const Sidebar = ({ isOpen, onLogout }) => {
           <div className="logo-icon">GPF</div>
           {isOpen && <span className="logo-text">Farmer Admin</span>}
         </div>
-        <button 
-          className="toggle-rail-btn" 
-          onClick={() => window.dispatchEvent(new CustomEvent('toggle-sidebar'))}
-        >
-          <ChevronLeft size={20} className={!isOpen ? 'rotate-180' : ''} />
-        </button>
+        <div style={{ display: 'flex', gap: '0.5rem' }}>
+          <button 
+            className="toggle-rail-btn mobile-only" 
+            onClick={onClose}
+            style={{ display: 'none' }}
+          >
+            <X size={20} />
+          </button>
+          <button 
+            className="toggle-rail-btn desktop-only" 
+            onClick={() => window.dispatchEvent(new CustomEvent('toggle-sidebar'))}
+          >
+            <ChevronLeft size={20} className={!isOpen ? 'rotate-180' : ''} />
+          </button>
+        </div>
       </div>
 
       <nav className="sidebar-nav">
@@ -42,6 +62,11 @@ const Sidebar = ({ isOpen, onLogout }) => {
             to={item.path}
             className={`nav-item ${location.pathname === item.path ? 'active' : ''}`}
             title={!isOpen ? item.title : ''}
+            onClick={() => {
+              if (window.innerWidth <= 768 && onClose) {
+                onClose()
+              }
+            }}
           >
             {item.icon}
             {isOpen && <span className="nav-label">{item.title}</span>}

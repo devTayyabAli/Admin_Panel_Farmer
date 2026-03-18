@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { Lock, Mail, Eye, EyeOff, ArrowRight } from 'lucide-react'
+import { Lock, Mail, Eye, EyeOff, ArrowRight, Leaf, Shield } from 'lucide-react'
 import axios from 'axios'
 
 const Login = ({ onLogin }) => {
@@ -23,7 +23,7 @@ const Login = ({ onLogin }) => {
       localStorage.setItem('user', JSON.stringify(res.data.user))
       onLogin(res.data.user)
     } catch (err) {
-      setError(err.response?.data?.msg || err.message || 'Login failed')
+      setError(err.response?.data?.msg || err.message || 'Login failed. Please check your credentials.')
     } finally {
       setLoading(false)
     }
@@ -31,9 +31,18 @@ const Login = ({ onLogin }) => {
 
   return (
     <div className="login-page">
-      <div className="login-card glass-effect">
+      <div className="login-card">
         <div className="login-header">
-          <div className="logo-icon">GPF</div>
+          <div style={{ 
+            display: 'flex', 
+            alignItems: 'center', 
+            justifyContent: 'center',
+            marginBottom: '0.5rem'
+          }}>
+            <div className="logo-icon">
+              <Leaf size={28} />
+            </div>
+          </div>
           <h1>Admin Portal</h1>
           <p>Enter your credentials to manage the farm.</p>
         </div>
@@ -61,7 +70,7 @@ const Login = ({ onLogin }) => {
               <Lock size={18} className="input-icon" />
               <input 
                 type={showPassword ? 'text' : 'password'} 
-                placeholder="••••••••" 
+                placeholder="Enter your password" 
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
@@ -76,14 +85,43 @@ const Login = ({ onLogin }) => {
             </div>
           </div>
 
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.875rem' }}>
+            <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}>
+              <input type="checkbox" style={{ cursor: 'pointer' }} />
+              <span style={{ color: 'var(--text-secondary)' }}>Remember me</span>
+            </label>
+            <a href="#" style={{ color: 'var(--primary)', fontWeight: 500 }}>Forgot password?</a>
+          </div>
+
           <button type="submit" className="btn btn-primary login-btn" disabled={loading}>
-            {loading ? 'Authenticating...' : 'Sign In'}
-            {!loading && <ArrowRight size={18} />}
+            {loading ? (
+              <>
+                <span style={{ 
+                  width: '16px', 
+                  height: '16px', 
+                  border: '2px solid white', 
+                  borderTopColor: 'transparent', 
+                  borderRadius: '50%', 
+                  animation: 'spin 1s linear infinite',
+                  display: 'inline-block'
+                }}></span>
+                Authenticating...
+              </>
+            ) : (
+              <>
+                Sign In
+                <ArrowRight size={18} />
+              </>
+            )}
           </button>
         </form>
 
         <div className="login-footer">
-          <p>© 2026 GPF Farmer Management System</p>
+          <p style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}>
+            <Shield size={14} />
+            <span>Secured by GPF Farmer Management System</span>
+          </p>
+          <p style={{ marginTop: '0.5rem', fontSize: '0.75rem' }}>� 2026 All rights reserved.</p>
         </div>
       </div>
     </div>
