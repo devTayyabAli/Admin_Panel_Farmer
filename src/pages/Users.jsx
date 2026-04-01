@@ -28,6 +28,15 @@ const Users = () => {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [search, setSearch] = useState('')
   const [toast, setToast] = useState(null)
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 768)
+  const [currentPage, setCurrentPage] = useState(1)
+  const itemsPerPage = 10
+
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth <= 768)
+    window.addEventListener('resize', handleResize)
+    return () => window.removeEventListener('resize', handleResize)
+  }, [])
 
   const showToast = (message, type = 'success') => {
     setToast({ message, type })
@@ -57,7 +66,7 @@ const Users = () => {
     e.preventDefault()
     setIsSubmitting(true)
     try {
-      await axios.post('/api/admin/users', newUser, {
+      await axios.post('/admin/users', newUser, {
         headers: { 'x-auth-token': localStorage.getItem('token') }
       })
       setShowModal(false)
@@ -75,7 +84,7 @@ const Users = () => {
     e.preventDefault()
     setIsSubmitting(true)
     try {
-      await axios.put(`/api/admin/users/${selectedUser._id}`, editUser, {
+      await axios.put(`/admin/users/${selectedUser._id}`, editUser, {
         headers: { 'x-auth-token': localStorage.getItem('token') }
       })
       setShowEditModal(false)
@@ -92,7 +101,7 @@ const Users = () => {
   const handleDeleteUser = async () => {
     setIsSubmitting(true)
     try {
-      await axios.delete(`/api/admin/users/${selectedUser._id}`, {
+      await axios.delete(`/admin/users/${selectedUser._id}`, {
         headers: { 'x-auth-token': localStorage.getItem('token') }
       })
       setShowDeleteModal(false)
@@ -121,6 +130,22 @@ const Users = () => {
     (u.username?.toLowerCase() || '').includes(search.toLowerCase()) || 
     (u.email?.toLowerCase() || '').includes(search.toLowerCase())
   )
+
+  // Pagination logic
+  const indexOfLastItem = currentPage * itemsPerPage
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage
+  const currentUsers = filteredUsers.slice(indexOfFirstItem, indexOfLastItem)
+  const totalPages = Math.ceil(filteredUsers.length / itemsPerPage)
+
+  const handlePageChange = (page) => {
+    setCurrentPage(page)
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
+
+  // Reset to page 1 when search changes
+  useEffect(() => {
+    setCurrentPage(1)
+  }, [search])
 
   return (
     <div className="users-page">
@@ -159,127 +184,216 @@ const Users = () => {
         </div>
       </div>
 
-      <div className="card table-container">
-        <table>
-          <thead>
-            <tr>
-              <th>User</th>
-              <th>Contact Info</th>
-              <th>Role</th>
-              <th>Joined Date</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {filteredUsers.map(user => (
-              <tr key={user._id}>
-                <td>
-                  <div className="user-cell">
-                    <div className="user-avatar">{(user.username || '?').charAt(0).toUpperCase()}</div>
-                    <span>{user.username || 'Unknown User'}</span>
-                  </div>
-                </td>
-                <td>
-                  <div className="contact-cell">
-                    <Mail size={14} />
-                    <span>{user.email}</span>
-                  </div>
-                </td>
-                <td>
+      {/* Mobile Responsive User Cards */}
+      {isMobile ? (
+        <div className="user-cards-list">
+          {currentUsers.map(user => (
+            <div key={user._id} className="user-card">
+              <div className="user-card-header">
+                <div className="user-avatar">{(user.username || '?').charAt(0).toUpperCase()}</div>
+                <div className="user-card-info">
+                  <h4>{user.username || 'Unknown User'}</h4>
                   <span className={`badge ${user.role === 'admin' ? 'badge-success' : 'badge-secondary'}`}>
                     {user.role}
                   </span>
-                </td>
-                <td>
-                  <div className="date-cell">
-                    <Calendar size={14} />
-                    <span>{new Date(user.createdAt).toLocaleDateString()}</span>
-                  </div>
-                </td>
-                <td>
-                  <div style={{ display: 'flex', gap: '0.5rem' }}>
-                    <button 
-                      className="icon-btn-sm" 
-                      onClick={() => openEditModal(user)}
-                      title="Edit User"
-                      style={{ color: '#3b82f6' }}
-                    >
-                      <Edit2 size={16} />
-                    </button>
-                    <button 
-                      className="icon-btn-sm" 
-                      onClick={() => openDeleteModal(user)}
-                      title="Delete User"
-                      style={{ color: '#ef4444' }}
-                    >
-                      <Trash2 size={16} />
-                    </button>
-                  </div>
-                </td>
-              </tr>
-            ))}
-            {filteredUsers.length === 0 && (
+                </div>
+              </div>
+              <div className="user-card-body">
+                <div className="user-card-row">
+                  <Mail size={14} />
+                  <span>{user.email}</span>
+                </div>
+                <div className="user-card-row">
+                  <Calendar size={14} />
+                  <span>{new Date(user.createdAt).toLocaleDateString()}</span>
+                </div>
+              </div>
+              <div className="user-card-actions">
+                <button 
+                  className="icon-btn-sm" 
+                  onClick={() => openEditModal(user)}
+                  style={{ color: '#3b82f6' }}
+                >
+                  <Edit2 size={18} />
+                </button>
+                <button 
+                  className="icon-btn-sm" 
+                  onClick={() => openDeleteModal(user)}
+                  style={{ color: '#ef4444' }}
+                >
+                  <Trash2 size={18} />
+                </button>
+              </div>
+            </div>
+          ))}
+          {filteredUsers.length === 0 && (
+            <div className="empty-state">
+              <UserIcon size={48} style={{ color: '#94a3b8', marginBottom: '1rem' }} />
+              <p>No users found matching your search.</p>
+            </div>
+          )}
+        </div>
+      ) : (
+        <div className="card table-container">
+          <table>
+            <thead>
               <tr>
-                <td colSpan="5" className="empty-state">
-                  <UserIcon size={48} style={{ color: '#94a3b8', marginBottom: '1rem' }} />
-                  <p>No users found matching your search.</p>
-                </td>
+                <th>User</th>
+                <th>Contact Info</th>
+                <th>Role</th>
+                <th>Joined Date</th>
+                <th>Actions</th>
               </tr>
-            )}
-          </tbody>
-        </table>
-      </div>
+            </thead>
+            <tbody>
+              {currentUsers.map(user => (
+                <tr key={user._id}>
+                  <td>
+                    <div className="user-cell">
+                      <div className="user-avatar">{(user.username || '?').charAt(0).toUpperCase()}</div>
+                      <span>{user.username || 'Unknown User'}</span>
+                    </div>
+                  </td>
+                  <td>
+                    <div className="contact-cell">
+                      <Mail size={14} />
+                      <span>{user.email}</span>
+                    </div>
+                  </td>
+                  <td>
+                    <span className={`badge ${user.role === 'admin' ? 'badge-success' : 'badge-secondary'}`}>
+                      {user.role}
+                    </span>
+                  </td>
+                  <td>
+                    <div className="date-cell">
+                      <Calendar size={14} />
+                      <span>{new Date(user.createdAt).toLocaleDateString()}</span>
+                    </div>
+                  </td>
+                  <td>
+                    <div style={{ display: 'flex', gap: '0.5rem' }}>
+                      <button 
+                        className="icon-btn-sm" 
+                        onClick={() => openEditModal(user)}
+                        title="Edit User"
+                        style={{ color: '#3b82f6' }}
+                      >
+                        <Edit2 size={16} />
+                      </button>
+                      <button 
+                        className="icon-btn-sm" 
+                        onClick={() => openDeleteModal(user)}
+                        title="Delete User"
+                        style={{ color: '#ef4444' }}
+                      >
+                        <Trash2 size={16} />
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+              {filteredUsers.length === 0 && (
+                <tr>
+                  <td colSpan="5" className="empty-state">
+                    <UserIcon size={48} style={{ color: '#94a3b8', marginBottom: '1rem' }} />
+                    <p>No users found matching your search.</p>
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+      )}
+
+      {/* Pagination */}
+      {totalPages > 1 && (
+        <div className="pagination">
+          <div className="pagination-info">
+            Showing {indexOfFirstItem + 1} to {Math.min(indexOfLastItem, filteredUsers.length)} of {filteredUsers.length} users
+          </div>
+          <div className="pagination-controls">
+            <button 
+              className="btn btn-ghost btn-sm"
+              onClick={() => handlePageChange(currentPage - 1)}
+              disabled={currentPage === 1}
+            >
+              Previous
+            </button>
+            {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
+              <button
+                key={page}
+                className={`btn btn-sm ${currentPage === page ? 'btn-primary' : 'btn-ghost'}`}
+                onClick={() => handlePageChange(page)}
+              >
+                {page}
+              </button>
+            ))}
+            <button 
+              className="btn btn-ghost btn-sm"
+              onClick={() => handlePageChange(currentPage + 1)}
+              disabled={currentPage === totalPages}
+            >
+              Next
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Add User Modal */}
       {showModal && (
         <div className="modal-overlay" onClick={() => setShowModal(false)}>
-          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <div className="modal-content modal-compact" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
               <h2>Add New User</h2>
               <button className="icon-btn-sm" onClick={() => setShowModal(false)}>
                 <X size={20} />
               </button>
             </div>
-            <form onSubmit={handleCreateUser}>
-              <div className="form-group">
-                <label>Username</label>
-                <input 
-                  type="text" 
-                  required 
-                  value={newUser.username}
-                  onChange={(e) => setNewUser(prev => ({ ...prev, username: e.target.value }))}
-                  placeholder="Enter username"
-                />
+            <form onSubmit={handleCreateUser} className="modal-form">
+              <div className="form-row">
+                <div className="form-group">
+                  <label>Username</label>
+                  <input 
+                    type="text" 
+                    required 
+                    value={newUser.username}
+                    onChange={(e) => setNewUser(prev => ({ ...prev, username: e.target.value }))}
+                    placeholder="Enter username"
+                  />
+                </div>
+                <div className="form-group">
+                  <label>Email</label>
+                  <input 
+                    type="email" 
+                    required 
+                    value={newUser.email}
+                    onChange={(e) => setNewUser(prev => ({ ...prev, email: e.target.value }))}
+                    placeholder="Enter email address"
+                  />
+                </div>
               </div>
-              <div className="form-group">
-                <label>Email</label>
-                <input 
-                  type="email" 
-                  required 
-                  value={newUser.email}
-                  onChange={(e) => setNewUser(prev => ({ ...prev, email: e.target.value }))}
-                  placeholder="Enter email address"
-                />
-              </div>
-              <div className="form-group">
-                <label>Password</label>
-                <input 
-                  type="password" 
-                  required 
-                  value={newUser.password}
-                  onChange={(e) => setNewUser(prev => ({ ...prev, password: e.target.value }))}
-                  placeholder="Enter password"
-                />
-              </div>
-              <div className="form-group">
-                <label>Role</label>
-                <select 
-                  value={newUser.role}
-                  onChange={(e) => setNewUser(prev => ({ ...prev, role: e.target.value }))}
-                >
-                  <option value="user">Farmer (User)</option>
-                  <option value="admin">Administrator</option>
-                </select>
+              <div className="form-row">
+                <div className="form-group">
+                  <label>Password</label>
+                  <input 
+                    type="password" 
+                    required 
+                    value={newUser.password}
+                    onChange={(e) => setNewUser(prev => ({ ...prev, password: e.target.value }))}
+                    placeholder="Enter password"
+                  />
+                </div>
+                <div className="form-group">
+                  <label>Role</label>
+                  <select 
+                    value={newUser.role}
+                    onChange={(e) => setNewUser(prev => ({ ...prev, role: e.target.value }))}
+                  >
+                    <option value="user">Farmer (User)</option>
+                    <option value="admin">Administrator</option>
+                  </select>
+                </div>
               </div>
               <div className="modal-actions">
                 <button type="button" className="btn btn-ghost" onClick={() => setShowModal(false)}>

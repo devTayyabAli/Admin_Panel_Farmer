@@ -50,9 +50,9 @@ const Login = ({ onLogin }) => {
         <form onSubmit={handleSubmit} className="login-form">
           {error && <div className="error-alert">{error}</div>}
           
-          <div className="input-group">
+          <div className="input-group" style={{display: 'flex', flexDirection: 'column',alignItems: 'flex-start'}}>
             <label>Email Address</label>
-            <div className="input-wrapper">
+            <div className="input-wrapper" style={{width: '100%'}}>
               <Mail size={18} className="input-icon" />
               <input 
                 type="email" 
@@ -64,9 +64,9 @@ const Login = ({ onLogin }) => {
             </div>
           </div>
 
-          <div className="input-group">
+          <div className="input-group" style={{display: 'flex', flexDirection: 'column',alignItems: 'flex-start'}}>
             <label>Password</label>
-            <div className="input-wrapper">
+            <div className="input-wrapper" style={{width: '100%'}}>
               <Lock size={18} className="input-icon" />
               <input 
                 type={showPassword ? 'text' : 'password'} 
@@ -87,7 +87,7 @@ const Login = ({ onLogin }) => {
 
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.875rem' }}>
             <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}>
-              <input type="checkbox" style={{ cursor: 'pointer' }} />
+              <input type="checkbox" style={{ cursor: 'pointer', accentColor: 'var(--primary)', width: '18px', height: '18px' }} />
               <span style={{ color: 'var(--text-secondary)' }}>Remember me</span>
             </label>
             <a href="#" style={{ color: 'var(--primary)', fontWeight: 500 }}>Forgot password?</a>
@@ -121,7 +121,7 @@ const Login = ({ onLogin }) => {
             <Shield size={14} />
             <span>Secured by GPF Farmer Management System</span>
           </p>
-          <p style={{ marginTop: '0.5rem', fontSize: '0.75rem' }}>© 2026 All rights reserved.</p>
+          <p style={{ marginTop: '0.5rem', fontSize: '0.75rem' }}>ï¿½ 2026 All rights reserved.</p>
         </div>
       </div>
     </div>

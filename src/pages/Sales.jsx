@@ -60,7 +60,7 @@ const Sales = () => {
   useEffect(() => {
     const fetchUsers = async () => {
       try {
-        const res = await axios.get('/api/admin/users', {
+        const res = await axios.get('/admin/users', {
           headers: { 'x-auth-token': localStorage.getItem('token') }
         })
         setUsers(res.data)
@@ -349,7 +349,7 @@ const Sales = () => {
                 </h3>
               </div>
               
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', alignItems: 'start' }}>
                 <div>
                   <label style={{ fontSize: '0.75rem', color: 'var(--text-muted)', textTransform: 'uppercase' }}>Date</label>
                   <p style={{ fontWeight: 600 }}>{new Date(selectedSale.date).toLocaleDateString()}</p>
@@ -377,7 +377,7 @@ const Sales = () => {
               
               <div style={{ borderTop: '1px solid var(--border)', paddingTop: '1rem' }}>
                 <h4 style={{ marginBottom: '0.75rem', fontSize: '1rem' }}>Vehicle Information</h4>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem', alignItems: 'start' }}>
                   <div>
                     <label style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Vehicle Number</label>
                     <p style={{ fontWeight: 600 }}>{selectedSale.vehicleNo}</p>
@@ -399,7 +399,7 @@ const Sales = () => {
               
               <div style={{ borderTop: '1px solid var(--border)', paddingTop: '1rem' }}>
                 <h4 style={{ marginBottom: '0.75rem', fontSize: '1rem' }}>Transaction Details</h4>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem', alignItems: 'start' }}>
                   <div>
                     <label style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Net Weight</label>
                     <p style={{ fontWeight: 600 }}>{selectedSale.netWeight?.toLocaleString()} kg</p>
@@ -410,11 +410,11 @@ const Sales = () => {
                   </div>
                   <div>
                     <label style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Empty Weight</label>
-                    <p>{selectedSale.emptyWeight?.toLocaleString() || 0} kg</p>
+                    <p>{selectedSale.weight1?.toLocaleString() || 0} kg</p>
                   </div>
                   <div>
                     <label style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Loaded Weight</label>
-                    <p>{selectedSale.loadedWeight?.toLocaleString() || 0} kg</p>
+                    <p>{selectedSale.weight2?.toLocaleString() || 0} kg</p>
                   </div>
                 </div>
               </div>
