@@ -8,7 +8,6 @@ const Login = ({ onLogin }) => {
   const [showPassword, setShowPassword] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
-  const [retryCount, setRetryCount] = useState(0)
 
   const handleSubmit = async (e) => {
     e.preventDefault()
@@ -22,24 +21,9 @@ const Login = ({ onLogin }) => {
       }
       localStorage.setItem('token', res.data.token)
       localStorage.setItem('user', JSON.stringify(res.data.user))
-      setRetryCount(0) // Reset retry count on success
       onLogin(res.data.user)
     } catch (err) {
-      const isDbError = err.response?.data?.msg?.includes('Database connection') || 
-                      err.response?.data?.msg?.includes('timeout')
-      
-      if (isDbError && retryCount < 3) {
-        // Retry automatically for database errors
-        const delay = Math.pow(2, retryCount) * 1000 // Exponential backoff: 1s, 2s, 4s
-        setError(`Connection issue. Retrying in ${delay/1000} seconds...`)
-        
-        setTimeout(() => {
-          setRetryCount(retryCount + 1)
-          handleSubmit(e) // Retry the request
-        }, delay)
-      } else {
-        setError(err.response?.data?.msg || err.message || 'Login failed. Please check your credentials.')
-      }
+      setError(err.response?.data?.msg || err.message || 'Login failed. Please check your credentials.')
     } finally {
       setLoading(false)
     }
@@ -64,34 +48,7 @@ const Login = ({ onLogin }) => {
         </div>
 
         <form onSubmit={handleSubmit} className="login-form">
-          {error && (
-            <div className="error-message" style={{ 
-              display: 'flex', 
-              alignItems: 'center', 
-              gap: '0.5rem',
-              padding: '0.75rem',
-              backgroundColor: 'rgba(239, 68, 68, 0.1)',
-              border: '1px solid rgba(239, 68, 68, 0.2)',
-              borderRadius: '8px',
-              marginBottom: '1rem'
-            }}>
-              <AlertCircle size={16} style={{ color: '#ef4444', flexShrink: 0 }} />
-              <span style={{ color: '#ef4444', fontSize: '0.875rem' }}>{error}</span>
-              {error.includes('Retrying') && (
-                <button 
-                  type="button" 
-                  className="btn btn-ghost" 
-                  style={{ marginLeft: 'auto', fontSize: '0.75rem' }}
-                  onClick={() => {
-                    setRetryCount(0)
-                    setError('')
-                  }}
-                >
-                  Cancel Retry
-                </button>
-              )}
-            </div>
-          )}
+          {error && <div className="error-alert">{error}</div>}
           
           <div className="input-group" style={{display: 'flex', flexDirection: 'column',alignItems: 'flex-start'}}>
             <label>Email Address</label>
